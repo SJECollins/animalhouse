@@ -28,7 +28,7 @@ app.config["MAIL_USERNAME"] = os.environ.get("MAIL_NAME")
 app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASS")
 
 # Using whitenoise to serve static files
-app.wsgi_app = WhiteNoise(app.wsgi_app, root="frontend/build/")
+app.wsgi_app = WhiteNoise(app.wsgi_app, root="/frontend/build/")
 
 # Cloudinary configuration
 cloudinary.config(
