@@ -14,6 +14,7 @@ const AnimalsPage = () => {
     const fetchAnimals = async () => {
       try {
         const { data } = await axiosRes.get("/animals/");
+        console.log(data);
         setAnimals(data.animals);
       } catch (err) {
         console.log(err);

@@ -16,6 +16,8 @@ const HomePage = () => {
           axiosRes.get("/animals/"),
           axiosRes.get("/donation/all/"),
         ]);
+        console.log(animals);
+        console.log(donors);
         if (
           animals?.animals.length === 0 ||
           animals?.animals.length === undefined
