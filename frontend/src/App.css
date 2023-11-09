@@ -1,0 +1,167 @@
+.App {
+  text-align: center;
+}
+
+.loader {
+  height: 40vmin;
+  pointer-events: none;
+  transform: scaleX(-1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .loading {
+    animation: loading-spin infinite 9s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Headers */
+
+h1,
+h2,
+h3 {
+  margin: 1em 0.5em 0.5em;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 3em;
+}
+
+h2 {
+  font-size: 2em;
+}
+
+h3 {
+  font-size: 1.5em;
+}
+
+/* Forms */
+
+.forms {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 1em;
+  padding: 1em;
+  width: min(90%, 500px);
+  box-shadow: 0 4px 8px 0 #8b5cf6;
+  border-radius: 8px;
+}
+
+.forms h1 {
+  font-size: 2em;
+  margin: 0.5em;
+}
+
+.forms input,
+.forms textarea {
+  padding: 0.5em;
+  margin: 0.5em;
+  border: 1px solid #5b21b6;
+  border-radius: 4px;
+  width: 90%;
+}
+
+.forms input:focus,
+.forms textarea:focus {
+  outline: none;
+  border: 1px solid #8b5cf6;
+  box-shadow: 0 0 10px #8b5cf6;
+}
+
+.forms label {
+  align-self: flex-start;
+  margin-left: 1.5em;
+}
+
+/* Buttons */
+
+.btns {
+  background-color: #8b5cf6;
+  color: #ede9fe;
+  padding: 0.25em 1em;
+  margin: 0.5em;
+  border: 1px solid #8b5cf6;
+  border-radius: 8px;
+  box-shadow: 0 0 8px #5b21b6;
+  transition: all 0.3s ease-in-out;
+}
+
+.btns:active,
+.btns:hover {
+  background-color: #5b21b6;
+  color: #c4b5fd;
+  border: 1px solid #5b21b6;
+  box-shadow: 0 0 8px #8b5cf6;
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  width: 90%;
+  margin: 1em;
+  padding: 1em;
+}
+
+tr {
+  border-bottom: 1px solid #8b5cf6;
+}
+
+th,
+td {
+  padding: 0.5em;
+  text-align: left;
+}
+
+/* Underline */
+
+.underline {
+  border-bottom: 1px solid #8b5cf6;
+}
+
+/* Stripe Styling */
+.custom-card-element {
+  border: 1px solid #5b21b6;
+  border-radius: 4px;
+  padding: 10px;
+  width: 90% !important;
+  font-size: 16px;
+  color: #333;
+}
+
+/* Override */
+.row-imp {
+  flex-direction: row !important;
+}
+
+.no-shadow {
+  box-shadow: none !important;
+}
+
+/* Text fade out */
+.text-fade-out {
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
