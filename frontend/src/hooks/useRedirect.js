@@ -13,7 +13,7 @@ export const useRedirect = (userAuthStatus) => {
       if (accessToken && userAuthStatus === "loggedIn") {
         navigate("/");
       } else if (!accessToken && userAuthStatus === "loggedOut") {
-        navigate("/sigin");
+        navigate("/signin");
       } else if (userAuthStatus === "user") {
         if (currentUser?.role === "customer") {
           navigate("/");
