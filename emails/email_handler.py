@@ -10,6 +10,10 @@ def init_mail(app):
 
 
 def send_donation_mail(recipient, donor_name, donation_amount):
+    print("Sending email")
+    print(recipient)
+    print(donor_name)
+    print(donation_amount)
     subject = "Thank you for your donation"
     message = render_template(
         "emails/donation_email.html",

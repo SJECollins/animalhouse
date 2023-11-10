@@ -17,14 +17,14 @@ const HomePage = () => {
           axiosRes.get("/donation/all/"),
         ]);
         if (animals.animals !== undefined) {
-          setRecentAnimals([]);
-        } else {
           getRecentAnimals(animals.animals);
+        } else {
+          setRecentAnimals([]);
         }
         if (donors.donations !== undefined) {
-          setRecentDonors([]);
-        } else {
           getRecentDonors(donors.donations);
+        } else {
+          setRecentDonors([]);
         }
         setLoading(false);
       } catch (err) {

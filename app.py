@@ -19,8 +19,7 @@ app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
 mongo = PyMongo(app)
 api = Api(app)
 jwt = JWTManager(app)
-mail = Mail()
-init_mail(app)
+
 
 # Email configuration
 app.config["MAIL_SERVER"] = os.environ.get("MAIL_SERVER")
@@ -28,6 +27,8 @@ app.config["MAIL_PORT"] = 587
 app.config["MAIL_USE_TLS"] = True
 app.config["MAIL_USERNAME"] = os.environ.get("MAIL_NAME")
 app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASS")
+app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("MAIL_NAME")
+app.config["MAIL_DEBUG"] = True
 
 # Using whitenoise to serve static files
 app.wsgi_app = WhiteNoise(app.wsgi_app, root="frontend/build/")
@@ -39,11 +40,16 @@ cloudinary.config(
     api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
 )
 
+mail = Mail()
+init_mail(app)
+
 
 # Serve React App
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve(path):
+    mail.connect()
+    print(f"Connection State: {mail.server.isConnected()}")
     if path != "" and os.path.exists("frontend/build/" + path):
         return send_from_directory("frontend/build", path)
     else:

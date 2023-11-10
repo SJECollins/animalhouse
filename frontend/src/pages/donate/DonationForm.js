@@ -53,7 +53,7 @@ const DonationForm = (props) => {
     event.preventDefault();
 
     const formData = new FormData();
-    formData.append("amount", amount);
+    formData.append("amount", amount.toFixed(2));
     formData.append("name", name);
     formData.append("email", email);
     formData.append("phone", phone);
