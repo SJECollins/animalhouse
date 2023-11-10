@@ -16,20 +16,12 @@ const HomePage = () => {
           axiosRes.get("/animals/"),
           axiosRes.get("/donation/all/"),
         ]);
-        console.log(animals);
-        console.log(donors);
-        if (
-          animals?.animals.length === 0 ||
-          animals?.animals.length === undefined
-        ) {
+        if (animals.animals !== undefined) {
           setRecentAnimals([]);
         } else {
           getRecentAnimals(animals.animals);
         }
-        if (
-          donors?.donations.length === 0 ||
-          donors?.donations.length === undefined
-        ) {
+        if (donors.donations !== undefined) {
           setRecentDonors([]);
         } else {
           getRecentDonors(donors.donations);

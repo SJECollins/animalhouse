@@ -21,7 +21,6 @@ export const StripeProvider = ({ children }) => {
 
     loadStripeInstance();
   }, []);
-  console.log("Stripe: ", stripe);
 
   return (
     <StripeContext.Provider value={stripe}>{children}</StripeContext.Provider>

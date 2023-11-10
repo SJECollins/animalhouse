@@ -14,18 +14,51 @@ const AccountPage = () => {
   useEffect(() => {
     const handleMount = async () => {
       try {
-        const { donationData, adoptionData } = await Promise.all([
-          axiosRes.get("/donation/" + id + "/"),
-          axiosRes.get("/adoption/" + id + "/"),
-        ]);
-        setDonations(donationData);
-        setAdoptions(adoptionData);
+        const [{ data: donationData }, { data: adoptionData }] =
+          await Promise.all([
+            axiosRes.get("/donation/" + id + "/"),
+            axiosRes.get("/adoption/" + id + "/"),
+          ]);
+        if (donationData.donations !== undefined) {
+          getDonations(donationData.donations);
+        } else {
+          setDonations([]);
+        }
+        if (adoptionData.adoption_requests !== undefined) {
+          getAdoptions(adoptionData.adoption_requests);
+        } else {
+          setAdoptions([]);
+        }
       } catch (error) {
         console.log(error);
       }
     };
     handleMount();
   }, [id]);
+
+  const getDonations = (donations) => {
+    let donationsByDate = donations.sort(
+      (a, b) => -a.date_created.localeCompare(b.date_created)
+    );
+    for (let donation of donationsByDate) {
+      donation.date_created = new Date(
+        donation.date_created
+      ).toLocaleDateString("en-US");
+    }
+    setDonations(donationsByDate);
+  };
+
+  const getAdoptions = (adoptions) => {
+    let adoptionsByDate = adoptions.sort(
+      (a, b) => -a.date_created.localeCompare(b.date_created)
+    );
+    for (let adoption of adoptionsByDate) {
+      adoption.date_created = new Date(
+        adoption.date_created
+      ).toLocaleDateString("en-US");
+    }
+    setAdoptions(adoptionsByDate);
+  };
 
   return (
     <div className="flex flex-col justify-center items-center w-11/12 min-h-[80vh]">
@@ -36,10 +69,10 @@ const AccountPage = () => {
           <h2>Donations</h2>
           {/* List of donations */}
           {donations?.length > 0 ? (
-            donations?.map((donation) => (
-              <div>
-                <p>Donation Amount: {donation.amount}</p>
-                <p>Donation Date: {donation.date}</p>
+            donations?.map((donation, index) => (
+              <div key={index} className="mb-4">
+                <p>Donation Amount: €{donation.amount}</p>
+                <p>Donation Date: {donation.date_created}</p>
               </div>
             ))
           ) : (
@@ -50,10 +83,10 @@ const AccountPage = () => {
           <h2>Adoption Requests</h2>
           {/* List of adoption requests */}
           {adoptions?.length > 0 ? (
-            adoptions?.map((adoption) => (
-              <div>
-                <p>Animal Name: {adoption.animal.name}</p>
-                <p>Adoption Request Date: {adoption.date}</p>
+            adoptions?.map((adoption, index) => (
+              <div key={index} className="mb-4">
+                <p>Animal Name: {adoption.animal}</p>
+                <p>Adoption Request Date: {adoption.date_created}</p>
                 <p>Status: {adoption.status}</p>
               </div>
             ))

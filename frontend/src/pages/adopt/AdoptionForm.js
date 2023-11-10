@@ -18,10 +18,12 @@ const AdoptionForm = () => {
     message: "",
     account_id: currentUser?._id || "",
     animal: name,
-    animal_d: _id,
+    animal_id: _id,
   });
   const { username, email, phone, message } = formData;
   const msgPlaceholder = `Please enter a short description about yourself and why you're interested in adopting ${name}.`;
+
+  console.log(formData);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -97,6 +99,12 @@ const AdoptionForm = () => {
         <button className="btns" type="submit">
           Send Adoption Enquiry
         </button>
+        {errors.non_field_errors?.map((message, index) => (
+          <ErrAlert key={index} message={message} />
+        ))}
+        {errors.animal_id?.map((message, index) => (
+          <ErrAlert key={index} message={message} />
+        ))}
       </form>
     </div>
   );

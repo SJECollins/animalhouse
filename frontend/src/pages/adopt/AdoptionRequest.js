@@ -14,7 +14,6 @@ const AdoptionRequest = () => {
     const fetchAdoption = async () => {
       try {
         const { data } = await axiosReq.get("/adoption/" + id);
-        console.log(data);
         setAdoption(data);
         setStatus(data.status);
       } catch (err) {

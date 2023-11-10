@@ -173,7 +173,6 @@ class UserLoginResource(Resource):
 
     def post(self):
         data = self.parser.parse_args()
-        print(data)
         if not data["email"] and not data["password"]:
             return {
                 "non_field_errors": ["Email and password are required"],
@@ -185,7 +184,6 @@ class UserLoginResource(Resource):
 
         try:
             user = self.mongo.db.users.find_one({"email": data["email"]})
-            print(user)
             if user:
                 user["_id"] = str(user["_id"])
                 if UserResource.verify_password(

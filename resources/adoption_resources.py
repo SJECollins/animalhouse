@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask_restful import Resource, reqparse
 from pymongo import errors
 from bson.objectid import ObjectId
@@ -66,9 +67,9 @@ class AdoptionRequestCreateResource(Resource):
                     "There has been an error adding the animal, please return to their profile and try again"
                 ]
             }, 400
-        if not data["animalId"]:
+        if not data["animal_id"]:
             return {
-                "animalId": [
+                "animal_id": [
                     "There has been an error adding the animal, please return to their profile and try again"
                 ]
             }, 400
@@ -76,17 +77,22 @@ class AdoptionRequestCreateResource(Resource):
             return {"message": ["Message is required"]}, 400
 
         try:
-            print(data)
+            data["date_created"] = datetime.now()
             self.mongo.db.adoption_requests.insert_one(data)
             send_adoption_mail(data["email"], data["username"], data["animal"])
             return {"message": "Adoption request created successfully"}, 201
         except errors.PyMongoError as e:
             return {
-                "message": "An error occurred creating the adoption request",
+                "none_field_errors": [
+                    "An error occurred creating the adoption request"
+                ],
                 "error": str(e),
             }, 500
         except Exception as e:
-            return {"message": "An unexpected error occurred", "error": str(e)}, 500
+            return {
+                "non_field_errors": ["An unexpected error occurred"],
+                "error": str(e),
+            }, 500
 
 
 class AdoptionListResource(Resource):
@@ -101,19 +107,25 @@ class AdoptionListResource(Resource):
             if user_id == "all":
                 adoption_requests = mongo.db.adoption_requests.find()
             else:
-                adoption_requests = mongo.db.adoption_requests.find(
-                    {"account_id": user_id}
+                adoption_requests = list(
+                    mongo.db.adoption_requests.find({"account_id": user_id})
                 )
-                if len(list(adoption_requests)) == 0:
+                if len(adoption_requests) == 0:
                     return {
                         "message": "No adoption requests found",
                         "adoption_requests": [],
                     }
+            request_list = []
             for adoption_request in adoption_requests:
                 adoption_request["_id"] = str(adoption_request["_id"])
+                adoption_request["date_created"] = adoption_request[
+                    "date_created"
+                ].isoformat()
+                request_list.append(adoption_request)
+            print(request_list)
             return {
                 "message": "Adoption requests retrieved successfully",
-                "adoption_requests": list(adoption_requests),
+                "adoption_requests": request_list,
             }
         except errors.PyMongoError as e:
             return {

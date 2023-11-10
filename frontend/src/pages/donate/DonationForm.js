@@ -18,7 +18,6 @@ const DonationForm = (props) => {
   const [isCardElementCreated, setCardElementCreated] = useState(false);
   const [enterDetails, setEnterDetails] = useState(false);
   const [errors, setErrors] = useState({});
-  console.log("Errors: ", errors);
   useEffect(() => {
     if (stripe && elements && !isCardElementCreated) {
       setCardElementCreated(true);
@@ -93,10 +92,23 @@ const DonationForm = (props) => {
   };
 
   const handleAmountChange = (event) => {
-    event.target.value = parseFloat(event.target.value).toFixed(2);
+    let amt = Number(event.target.value).toString();
+
+    if (amt < 0) {
+      amt = 0;
+    }
+
+    if (amt.match(/\./g)) {
+      const decimalPlaces = amt.split(".")[1].length;
+      if (decimalPlaces > 2) {
+        amt = amt.slice(0, -1);
+      }
+    }
+    event.target.value = amt;
+
     setDonationData({
       ...donationData,
-      [event.target.name]: parseFloat(event.target.value),
+      [event.target.name]: parseFloat(amt),
     });
   };
 
@@ -253,9 +265,7 @@ const DonationForm = (props) => {
           <input
             type="number"
             name="amount"
-            min={0.0}
-            step={0.01}
-            value={amount}
+            value={donationData.amount}
             onChange={handleAmountChange}
             required
           />

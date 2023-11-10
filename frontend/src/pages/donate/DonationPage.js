@@ -11,7 +11,6 @@ const DonationPage = () => {
     const fetchDonations = async () => {
       try {
         const { data } = await axiosRes.get("/donation/all/");
-        console.log(data);
         getRecentDonors(data.donations);
         setLoading(false);
       } catch (err) {

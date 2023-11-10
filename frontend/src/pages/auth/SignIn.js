@@ -25,18 +25,14 @@ const SignIn = () => {
 
     try {
       const { data } = await axios.post("/login/", signInData);
-      console.log(data);
       setCurrentUser(data.user);
       setAccessTokenCookie(data.access_token);
       navigate(-1);
     } catch (err) {
       console.log(err);
-      console.log(err.response?.data);
       setErrors(err.response?.data);
     }
   };
-
-  console.log(errors);
 
   const handleChange = (event) => {
     setSignInData({

@@ -7,7 +7,6 @@ const stripePromise = loadStripe(
 );
 
 const DonationParent = () => {
-  console.log(stripePromise);
   return (
     <Elements stripe={stripePromise}>
       <WrappedDonationForm />

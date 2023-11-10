@@ -68,7 +68,6 @@ class AnimalResource(Resource):
             animal = self.mongo.db.animals.find_one({"_id": object_id})
             if animal:
                 update_data = self.parser.parse_args()
-                print(update_data)
                 if update_data["picture"] != "default":
                     try:
                         upload_result = cloudinary.uploader.upload(
@@ -82,10 +81,9 @@ class AnimalResource(Resource):
                         }, 500
                 else:
                     update_data["picture"] = "placeholder.png"
-                update = self.mongo.db.animals.update_one(
-                    {"_id": object_id}, {"$set": update_data}
-                )
-                print(update)
+                    self.mongo.db.animals.update_one(
+                        {"_id": object_id}, {"$set": update_data}
+                    )
                 return {"message": "Animal updated", "animal_id": animal_id}
             else:
                 return {"message": "Animal not found"}, 404

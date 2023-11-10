@@ -78,7 +78,6 @@ const AnimalEdit = () => {
       const response = await axiosRes.put("/animal/" + id + "/", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      console.log(response);
       navigate("/animal/" + response.data.animal_id);
     } catch (err) {
       console.log(err);

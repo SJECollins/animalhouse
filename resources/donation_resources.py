@@ -75,11 +75,11 @@ class DonationCreateResource(Resource):
                 description="Donation",
             )
 
-            print(charge)
-
             donation_data["date_created"] = datetime.now()
             donation_id = self.mongo.db.donations.insert_one(donation_data).inserted_id
             if donation_data["email"]:
+                if not donation_data["name"]:
+                    donation_data["name"] = "Anonymous"
                 send_donation_mail(
                     donation_data["email"],
                     donation_data["name"],
@@ -151,18 +151,20 @@ class DonationListResource(Resource):
             if user_id == "all":
                 donations = list(self.mongo.db.donations.find())
             else:
-                donations = self.mongo.db.donations.find({"account_id": user_id})
-                if len(list(donations)) == 0:
+                donations = list(self.mongo.db.donations.find({"account_id": user_id}))
+                if len(donations) == 0:
                     return {
                         "message": "No donations found for this user",
                         "donations": [],
                     }
+            donation_list = []
             for donation in donations:
                 donation["_id"] = str(donation["_id"])
                 donation["date_created"] = donation["date_created"].isoformat()
+                donation_list.append(donation)
             return {
                 "message": "Donations retrieved successfully",
-                "donations": donations,
+                "donations": donation_list,
             }
         except pymongo.errors.PyMongoError as e:
             return {
