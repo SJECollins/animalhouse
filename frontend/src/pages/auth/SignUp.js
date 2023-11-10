@@ -37,7 +37,7 @@ const SignUp = () => {
   };
 
   return (
-    <div className="flex flex-col items-center my-16">
+    <div className="flex flex-col items-center my-16 min-h-[80vh]">
       <form onSubmit={handleSubmit} className="forms">
         <h1>Sign Up</h1>
         <label>Email Address</label>

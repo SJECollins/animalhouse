@@ -6,6 +6,7 @@ from flask_jwt_extended import JWTManager
 from whitenoise import WhiteNoise
 from flask_mail import Mail
 import cloudinary
+from emails.email_handler import init_mail
 
 if os.path.exists("env.py"):
     import env
@@ -18,7 +19,8 @@ app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
 mongo = PyMongo(app)
 api = Api(app)
 jwt = JWTManager(app)
-mail = Mail(app)
+mail = Mail()
+init_mail(app)
 
 # Email configuration
 app.config["MAIL_SERVER"] = os.environ.get("MAIL_SERVER")
@@ -48,47 +50,75 @@ def serve(path):
         return send_from_directory("frontend/build", "index.html")
 
 
-# Importing resources and running the app
+# Importing resources
+from resources.user_resources import (
+    UserResource,
+    UserDataResource,
+    UserListResource,
+    UserRegisterResource,
+    UserLoginResource,
+    UserAccessTokenRefresh,
+    UserAccessTokenRemove,
+)
+from resources.animal_resources import (
+    AnimalResource,
+    AnimalListResource,
+    AnimalCreateResource,
+)
+from resources.adoption_resources import (
+    AdoptionRequestCreateResource,
+    AdoptionListResource,
+)
+
+from resources.donation_resources import (
+    DonationCreateResource,
+    DonationListResource,
+)
+
+api.add_resource(
+    UserRegisterResource, "/api/register/", resource_class_kwargs={"mongo": mongo}
+)
+api.add_resource(
+    UserLoginResource, "/api/login/", resource_class_kwargs={"mongo": mongo}
+)
+api.add_resource(UserAccessTokenRefresh, "/api/refresh/")
+api.add_resource(UserAccessTokenRemove, "/api/logout/")
+api.add_resource(
+    UserResource, "/api/user/<user_id>/", resource_class_kwargs={"mongo": mongo}
+)
+api.add_resource(UserDataResource, "/api/user_data/")
+api.add_resource(
+    UserListResource, "/api/users/", resource_class_kwargs={"mongo": mongo}
+)
+api.add_resource(
+    AnimalResource, "/api/animal/<animal_id>/", resource_class_kwargs={"mongo": mongo}
+)
+api.add_resource(AnimalListResource, "/api/animals/")
+api.add_resource(
+    AnimalCreateResource, "/api/animal_create/", resource_class_kwargs={"mongo": mongo}
+)
+api.add_resource(
+    AdoptionRequestCreateResource,
+    "/api/adoption/request/",
+    resource_class_kwargs={"mongo": mongo},
+)
+api.add_resource(
+    AdoptionListResource,
+    "/api/adoption/<user_id>/",
+)
+api.add_resource(
+    DonationCreateResource,
+    "/api/donation/create/",
+    resource_class_kwargs={"mongo": mongo},
+)
+api.add_resource(
+    DonationListResource,
+    "/api/donation/<user_id>/",
+    resource_class_kwargs={"mongo": mongo},
+)
+
+# Running the app
 if __name__ == "__main__":
-    from resources.user_resources import (
-        UserResource,
-        UserDataResource,
-        UserListResource,
-        UserRegisterResource,
-        UserLoginResource,
-        UserAccessTokenRefresh,
-        UserAccessTokenRemove,
-    )
-    from resources.animal_resources import (
-        AnimalResource,
-        AnimalListResource,
-        AnimalCreateResource,
-    )
-    from resources.adoption_resources import (
-        AdoptionRequestCreateResource,
-        AdoptionListResource,
-    )
-
-    from resources.donation_resources import (
-        DonationCreateResource,
-        DonationListResource,
-    )
-
-    api.add_resource(UserRegisterResource, "/api/register/")
-    api.add_resource(UserLoginResource, "/api/login/")
-    api.add_resource(UserAccessTokenRefresh, "/api/refresh/")
-    api.add_resource(UserAccessTokenRemove, "/api/logout/")
-    api.add_resource(UserResource, "/api/user/<user_id>/")
-    api.add_resource(UserDataResource, "/api/user_data/")
-    api.add_resource(UserListResource, "/api/users/")
-    api.add_resource(AnimalResource, "/api/animal/<animal_id>/")
-    api.add_resource(AnimalListResource, "/api/animals/")
-    api.add_resource(AnimalCreateResource, "/api/animal_create/")
-    api.add_resource(AdoptionRequestCreateResource, "/api/adoption/request/")
-    api.add_resource(AdoptionListResource, "/api/adoption/<user_id>/")
-    api.add_resource(DonationCreateResource, "/api/donation/create/")
-    api.add_resource(DonationListResource, "/api/donation/<user_id>/")
-
     app.run(
         host=os.environ.get("IP"),
         port=int(os.environ.get("PORT")),

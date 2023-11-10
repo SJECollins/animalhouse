@@ -46,7 +46,7 @@ const SignIn = () => {
   };
 
   return (
-    <div className="flex flex-col items-center my-16">
+    <div className="flex flex-col items-center my-16 min-h-[80vh]">
       {registrationSuccess && (
         <div>Registration was successful. You can now log in.</div>
       )}

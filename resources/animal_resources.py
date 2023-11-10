@@ -3,7 +3,6 @@ from bson.objectid import ObjectId
 from flask_restful import Resource, reqparse
 import pymongo.errors
 import werkzeug
-from app import mongo
 
 import cloudinary.uploader
 
@@ -13,7 +12,7 @@ class AnimalResource(Resource):
     Resource to create, read, update or destroy a single animal.
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument(
             "name", type=str, location="form", required=True, help="Name is required"
@@ -47,12 +46,13 @@ class AnimalResource(Resource):
         self.parser.add_argument(
             "adopted", location="form", type=bool, required=False, default=False
         )
+        self.mongo = kwargs["mongo"]
         super(AnimalResource, self).__init__()
 
     def get(self, animal_id):
         try:
             object_id = ObjectId(animal_id)
-            animal = mongo.db.animals.find_one({"_id": object_id})
+            animal = self.mongo.db.animals.find_one({"_id": object_id})
             animal["_id"] = str(animal["_id"])
             animal["date_created"] = animal["date_created"].strftime("%d/%m/%Y")
             return {"message": "Animal retrieved", "animal": animal}
@@ -65,7 +65,7 @@ class AnimalResource(Resource):
     def put(self, animal_id):
         try:
             object_id = ObjectId(animal_id)
-            animal = mongo.db.animals.find_one({"_id": object_id})
+            animal = self.mongo.db.animals.find_one({"_id": object_id})
             if animal:
                 update_data = self.parser.parse_args()
                 print(update_data)
@@ -82,7 +82,7 @@ class AnimalResource(Resource):
                         }, 500
                 else:
                     update_data["picture"] = "placeholder.png"
-                update = mongo.db.animals.update_one(
+                update = self.mongo.db.animals.update_one(
                     {"_id": object_id}, {"$set": update_data}
                 )
                 print(update)
@@ -99,7 +99,7 @@ class AnimalResource(Resource):
 
     def delete(self, animal_id):
         try:
-            mongo.db.animals.delete_one({"_id": animal_id})
+            self.mongo.db.animals.delete_one({"_id": animal_id})
         except pymongo.errors.PyMongoError as e:
             return {
                 "message": "An error occurred while deleting the animal",
@@ -115,7 +115,7 @@ class AnimalCreateResource(Resource):
     Resource to create a single animal.
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument(
             "name", type=str, location="form", required=True, help="Name is required"
@@ -149,6 +149,7 @@ class AnimalCreateResource(Resource):
         self.parser.add_argument(
             "adopted", location="form", type=bool, required=False, default=False
         )
+        self.mongo = kwargs["mongo"]
         super(AnimalCreateResource, self).__init__()
 
     def post(self):
@@ -173,7 +174,7 @@ class AnimalCreateResource(Resource):
         ):
             return {"non_field_errors": ["Please fill in the form."]}, 400
 
-        if mongo.db.animals.find_one({"name": data["name"]}):
+        if self.mongo.db.animals.find_one({"name": data["name"]}):
             return {"name": ["An animal with that name already exists"]}, 400
 
         if data["picture"] != "default":
@@ -198,7 +199,7 @@ class AnimalCreateResource(Resource):
             "adopted": False,
         }
         try:
-            animal_data = mongo.db.animals.insert_one(new_animal)
+            animal_data = self.mongo.db.animals.insert_one(new_animal)
             animal_id = str(animal_data.inserted_id)
             return {
                 "message": "Animal created successfully",
@@ -219,6 +220,8 @@ class AnimalListResource(Resource):
     """
 
     def get(self):
+        from app import mongo
+
         try:
             animals = list(mongo.db.animals.find())
             animal_list = []

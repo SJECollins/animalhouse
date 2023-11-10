@@ -1,6 +1,12 @@
 from flask_mail import Message
 from flask import render_template
-from app import mail
+from flask_mail import Mail
+
+mail = Mail()
+
+
+def init_mail(app):
+    mail.init_app(app)
 
 
 def send_donation_mail(recipient, donor_name, donation_amount):

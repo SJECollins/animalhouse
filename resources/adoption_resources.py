@@ -1,5 +1,4 @@
 from flask_restful import Resource, reqparse
-from app import mongo
 from pymongo import errors
 from bson.objectid import ObjectId
 from emails.email_handler import send_adoption_mail
@@ -10,7 +9,7 @@ class AdoptionRequestCreateResource(Resource):
     Resource to create an adoption request.
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument(
             "username", type=str, required=True, help="Name is required"
@@ -52,6 +51,7 @@ class AdoptionRequestCreateResource(Resource):
             help="Status is required",
             default="Submitted",
         )
+        self.mongo = kwargs["mongo"]
         super(AdoptionRequestCreateResource, self).__init__()
 
     def post(self):
@@ -77,7 +77,7 @@ class AdoptionRequestCreateResource(Resource):
 
         try:
             print(data)
-            mongo.db.adoption_requests.insert_one(data)
+            self.mongo.db.adoption_requests.insert_one(data)
             send_adoption_mail(data["email"], data["username"], data["animal"])
             return {"message": "Adoption request created successfully"}, 201
         except errors.PyMongoError as e:
@@ -95,6 +95,8 @@ class AdoptionListResource(Resource):
     """
 
     def get(self, user_id):
+        from app import mongo
+
         try:
             if user_id == "all":
                 adoption_requests = mongo.db.adoption_requests.find()
@@ -127,7 +129,7 @@ class AdoptionRequestResource(Resource):
     Resource to retrieve, update and delete an adoption request.
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument(
             "username", type=str, required=True, help="Name is required"
@@ -168,11 +170,12 @@ class AdoptionRequestResource(Resource):
             required=False,
             help="Status is required",
         )
+        self.mongo = kwargs["mongo"]
         super(AdoptionRequestResource, self).__init__()
 
     def get(self, adoption_id):
         try:
-            adoption_request = mongo.db.adoption_requests.find_one(
+            adoption_request = self.mongo.db.adoption_requests.find_one(
                 {"_id": ObjectId(adoption_id)}
             )
             adoption_request["_id"] = str(adoption_request["_id"])
@@ -210,7 +213,7 @@ class AdoptionRequestResource(Resource):
             return {"message": ["Message is required"]}, 400
 
         try:
-            mongo.db.adoption_requests.update_one(
+            self.mongo.db.adoption_requests.update_one(
                 {"_id": ObjectId(adoption_id)}, {"$set": data}
             )
             return {"message": "Adoption request updated successfully"}, 200
@@ -224,7 +227,7 @@ class AdoptionRequestResource(Resource):
 
     def delete(self, adoption_id):
         try:
-            mongo.db.adoption_requests.delete_one({"_id": ObjectId(adoption_id)})
+            self.mongo.db.adoption_requests.delete_one({"_id": ObjectId(adoption_id)})
             return {"message": "Adoption request deleted successfully"}, 200
         except errors.PyMongoError as e:
             return {

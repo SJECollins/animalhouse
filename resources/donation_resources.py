@@ -3,7 +3,6 @@ from datetime import datetime
 from bson.objectid import ObjectId
 from flask_restful import Resource, reqparse
 import pymongo.errors
-from app import mongo
 import os
 
 from emails.email_handler import send_donation_mail
@@ -16,7 +15,7 @@ class DonationCreateResource(Resource):
     Resource to create a new donation.
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument(
             "stripeToken", type=str, required=True, help="Token is required"
@@ -60,6 +59,7 @@ class DonationCreateResource(Resource):
         self.parser.add_argument(
             "account_id", type=str, required=False, help="Account ID is required"
         )
+        self.mongo = kwargs["mongo"]
         super(DonationCreateResource, self).__init__()
 
     def post(self):
@@ -78,7 +78,7 @@ class DonationCreateResource(Resource):
             print(charge)
 
             donation_data["date_created"] = datetime.now()
-            donation_id = mongo.db.donations.insert_one(donation_data).inserted_id
+            donation_id = self.mongo.db.donations.insert_one(donation_data).inserted_id
             if donation_data["email"]:
                 send_donation_mail(
                     donation_data["email"],
@@ -98,7 +98,7 @@ class DonationListResource(Resource):
     Resource to get all donations.
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument(
             "stripeToken", type=str, required=True, help="Token is required"
@@ -142,15 +142,16 @@ class DonationListResource(Resource):
         self.parser.add_argument(
             "account_id", type=str, required=False, help="Account ID is required"
         )
+        self.mongo = kwargs["mongo"]
         super(DonationListResource, self).__init__()
 
     def get(self, user_id):
         try:
             donations = None
             if user_id == "all":
-                donations = list(mongo.db.donations.find())
+                donations = list(self.mongo.db.donations.find())
             else:
-                donations = mongo.db.donations.find({"account_id": user_id})
+                donations = self.mongo.db.donations.find({"account_id": user_id})
                 if len(list(donations)) == 0:
                     return {
                         "message": "No donations found for this user",

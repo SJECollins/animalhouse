@@ -9,7 +9,6 @@ from flask_jwt_extended import (
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 import pymongo.errors
-from app import mongo
 from bson.objectid import ObjectId
 
 
@@ -18,7 +17,7 @@ class UserResource(Resource):
     Resource to create, read, update or destroy a single user.
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument(
             "email", type=str, required=True, help="Email is required"
@@ -26,12 +25,13 @@ class UserResource(Resource):
         self.parser.add_argument(
             "password", type=str, required=True, help="Password is required"
         )
+        self.mongo = kwargs["mongo"]
         super(UserResource, self).__init__()
 
     def get(self, user_id):
         try:
             object_id = ObjectId(user_id)
-            user = mongo.db.users.find_one({"_id": object_id})
+            user = self.mongo.db.users.find_one({"_id": object_id})
             user["_id"] = str(user["_id"])
             return {"message": "User retrieved", "user": user}
         except pymongo.errors.PyMongoError as e:
@@ -45,10 +45,10 @@ class UserResource(Resource):
     def put(self, user_id):
         try:
             object_id = ObjectId(user_id)
-            user = mongo.db.users.find_one({"_id": object_id})
+            user = self.mongo.db.users.find_one({"_id": object_id})
             if user:
                 update_data = self.parser.parse_args()
-                mongo.db.users.update_one({"_id": user_id}, {"$set": update_data})
+                self.mongo.db.users.update_one({"_id": user_id}, {"$set": update_data})
                 return {"message": "User updated", "user_id": user_id}
             else:
                 return {"message": "User not found"}, 404
@@ -63,7 +63,7 @@ class UserResource(Resource):
     def delete(self, user_id):
         try:
             object_id = ObjectId(user_id)
-            mongo.db.users.delete_one({"_id": object_id})
+            self.mongo.db.users.delete_one({"_id": object_id})
             return {"message": "User deleted", "user_id": user_id}
         except pymongo.errors.PyMongoError as e:
             return {
@@ -82,10 +82,9 @@ class UserListResource(Resource):
     Resource to return a list of all users.
     """
 
-    def __init__(self):
-        super(UserListResource, self).__init__()
-
     def get(self):
+        from app import mongo
+
         try:
             users = list(mongo.db.users.find())  # Convert cursor to list
             user_list = []
@@ -106,7 +105,7 @@ class UserRegisterResource(Resource):
     Resource to register a new user.
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument(
             "email", type=str, required=True, help="Email is required"
@@ -117,6 +116,7 @@ class UserRegisterResource(Resource):
         self.parser.add_argument(
             "password2", type=str, required=True, help="Please confirm your password"
         )
+        self.mongo = kwargs["mongo"]
         super(UserRegisterResource, self).__init__()
 
     def post(self):
@@ -134,7 +134,7 @@ class UserRegisterResource(Resource):
         if data["password1"] != data["password2"]:
             return {"non_field_errors": ["Passwords do not match"]}, 400
 
-        user = mongo.db.users.find_one({"email": data["email"]})
+        user = self.mongo.db.users.find_one({"email": data["email"]})
         if user:
             return {"non_field_errors": ["User already exists"]}, 400
 
@@ -144,7 +144,7 @@ class UserRegisterResource(Resource):
             "password": hashed_password,
         }
         try:
-            mongo.db.users.insert_one(new_user)
+            self.mongo.db.users.insert_one(new_user)
             return {"message": "User created successfully", "data": data}, 201
         except pymongo.errors.PyMongoError as e:
             return {
@@ -160,7 +160,7 @@ class UserLoginResource(Resource):
     Resource to login a user.
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.parser = reqparse.RequestParser()
         self.parser.add_argument(
             "email", type=str, required=True, help="Email is required"
@@ -168,6 +168,7 @@ class UserLoginResource(Resource):
         self.parser.add_argument(
             "password", type=str, required=True, help="Password is required"
         )
+        self.mongo = kwargs["mongo"]
         super(UserLoginResource, self).__init__()
 
     def post(self):
@@ -183,7 +184,7 @@ class UserLoginResource(Resource):
             return {"password": ["Password is required"]}, 400
 
         try:
-            user = mongo.db.users.find_one({"email": data["email"]})
+            user = self.mongo.db.users.find_one({"email": data["email"]})
             print(user)
             if user:
                 user["_id"] = str(user["_id"])
@@ -255,6 +256,8 @@ class UserAccessTokenRemove(Resource):
 class UserDataResource(Resource):
     @jwt_required()
     def get(self):
+        from app import mongo
+
         current_user_id = get_jwt_identity()
         current_user_id = ObjectId(current_user_id)
         try:
