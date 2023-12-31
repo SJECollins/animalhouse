@@ -23,7 +23,7 @@ const AnimalsPage = () => {
   }, []);
 
   return (
-    <div className="mt-10">
+    <div className="mt-10 mx-4">
       {is_admin && (
         <Link to="/animal/new" className="btns">
           Add New Animal

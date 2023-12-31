@@ -40,7 +40,7 @@ const DonationPage = () => {
   };
 
   return (
-    <div className="flex flex-col justify-evenly items-center w-11/12">
+    <div className="flex flex-col justify-evenly items-center w-11/12 mx-auto">
       <h1>Donations</h1>
       <div className="max-w-lg my-4 mx-auto">
         <p className="text-justify">
