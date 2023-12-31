@@ -48,8 +48,6 @@ init_mail(app)
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve(path):
-    mail.connect()
-    print(f"Connection State: {mail.server.isConnected()}")
     if path != "" and os.path.exists("frontend/build/" + path):
         return send_from_directory("frontend/build", path)
     else:
